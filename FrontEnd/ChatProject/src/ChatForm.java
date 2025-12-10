@@ -14,6 +14,7 @@ public class ChatForm extends javax.swing.JFrame {
      */
     public ChatForm() {
         initComponents();
+        setLocationRelativeTo(null);
     }
 
     /**
