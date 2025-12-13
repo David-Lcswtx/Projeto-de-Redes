@@ -2,36 +2,39 @@
  *
  * @author arthux
  */
-public class criptografia {
+public class criptografia{
+    private static final int CHAVE = 3; //
 
-  
-
-    /**
-     * @param args the command line arguments
-     */
-    
-  
-    
-    
-  public static void criptografar(String texto, int num){ // vai receber a mesagem
-         int chave = num;
+  public static String criptografar(String texto){ // vai receber a mesagem
          StringBuilder resultado = new StringBuilder();
          
          for(char c: texto.toCharArray()){
              if(Character.isLetter(c)){
-                 char old = Character.isLowerCase(c) ? 'a' : 'A';
-                 char novo = (char) ((c- old - chave + 26) % 26 + old);
+                 char base = Character.isLowerCase(c) ? 'a' : 'A';
+                 char novo = (char)((c - base + CHAVE) % 26 + base);
                  resultado.append(novo);
              } else{
                  resultado.append(c);
              }
          }
-  
-  resultado.toString();  
+    resultado.toString();  
+    return resultado.toString();
   }
-}
 
-public static void descriptografar(String texto, int num){
-    int chave = num;
-    
-}  
+
+public static String descriptografar(String texto){
+    StringBuilder resultado = new StringBuilder();
+
+    for(char c: texto.toCharArray()){
+        if(Character.isLetter(c)){ 
+            char base = Character.isLowerCase(c) ? 'a' : 'A';
+            char novo = (char)((c - base - CHAVE + 26) % 26 + base);
+            resultado.append(novo);
+        } else{
+            resultado.append(c);
+            }
+        }   
+     resultado.toString(); 
+     return resultado.toString();
+}
+}
