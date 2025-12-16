@@ -8,59 +8,67 @@ public class TCPServidor {
     Socket cli;
     BufferedReader ent;
     PrintWriter sai;
+    ServerSocket ser;
+    volatile boolean rodando = true;
 
     public void iniSer() {
-        try (ServerSocket ser = new ServerSocket(por)) {
+        try {
+            ser = new ServerSocket(por);
 
-            cli = ser.accept();
+            while (rodando) {
+                cli = ser.accept();
 
-            ent = new BufferedReader(
-                new InputStreamReader(cli.getInputStream())
-            );
+                ent = new BufferedReader(new InputStreamReader(cli.getInputStream()));
+                sai = new PrintWriter(cli.getOutputStream(), true);
 
-            sai = new PrintWriter(
-                cli.getOutputStream(), true
-            );
+                iniThr();
 
-            iniThr();
+                while (cli.isConnected() && rodando) {
+                    Thread.sleep(100);
+                }
 
-            while (cli.isConnected()) {
-                Thread.sleep(100);
+                fecCon();
             }
 
-            fecCon();
-
-        } catch (Exception e) {
-            System.err.println("Erro servidor: " + e.getMessage());
+        } catch (IOException e) {
+            if (rodando) {
+                System.err.println("Erro servidor: " + e.getMessage());
+            }
+        } catch (InterruptedException e) {
+            System.err.println("Servidor interrompido");
         }
-    }
-
-    public void envMsg(String txt) {
-        sai.println(txt);
-    }
-
-    public String recMsg() throws IOException {
-        return ent.readLine();
     }
 
     private void iniThr() {
         thr = new Thread(() -> {
             try {
                 String msg;
-                while ((msg = recMsg()) != null) {
+                while ((msg = recMsg()) != null && rodando) {
                     System.out.println("Recebido: " + msg);
-                    envMsg(msg);
                 }
             } catch (IOException e) {
-                System.err.println("Erro thread: " + e.getMessage());
+                if (rodando) System.err.println("Erro thread: " + e.getMessage());
             }
         });
         thr.start();
     }
 
+    public void envMsg(String txt) {
+        if (sai != null) sai.println(txt);
+    }
+
+    public String recMsg() throws IOException {
+        return ent.readLine();
+    }
+
     public void fecCon() throws IOException {
-        ent.close();
-        sai.close();
-        cli.close();
+        if (ent != null) ent.close();
+        if (sai != null) sai.close();
+        if (cli != null) cli.close();
+    }
+
+    public void stop() throws IOException {
+        rodando = false;
+        if (ser != null) ser.close();
     }
 }
