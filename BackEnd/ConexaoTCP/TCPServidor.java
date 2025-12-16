@@ -8,67 +8,59 @@ public class TCPServidor {
     Socket cli;
     BufferedReader ent;
     PrintWriter sai;
-    ServerSocket ser;
-    volatile boolean rodando = true;
 
     public void iniSer() {
-        try {
-            ser = new ServerSocket(por);
+        try (ServerSocket ser = new ServerSocket(por)) {
 
-            while (rodando) {
-                cli = ser.accept();
+            cli = ser.accept();
 
-                ent = new BufferedReader(new InputStreamReader(cli.getInputStream()));
-                sai = new PrintWriter(cli.getOutputStream(), true);
+            ent = new BufferedReader(
+                new InputStreamReader(cli.getInputStream())
+            );
 
-                iniThr();
+            sai = new PrintWriter(
+                cli.getOutputStream(), true
+            );
 
-                while (cli.isConnected() && rodando) {
-                    Thread.sleep(100);
-                }
+            iniThr();
 
-                fecCon();
+            while (cli.isConnected()) {
+                Thread.sleep(100);
             }
 
-        } catch (IOException e) {
-            if (rodando) {
-                System.err.println("Erro servidor: " + e.getMessage());
-            }
-        } catch (InterruptedException e) {
-            System.err.println("Servidor interrompido");
+            fecCon();
+
+        } catch (Exception e) {
+            System.err.println("Erro servidor: " + e.getMessage());
         }
     }
 
-    private void iniThr() {
-        thr = new Thread(() -> {
-            try {
-                String msg;
-                while ((msg = recMsg()) != null && rodando) {
-                    System.out.println("Recebido: " + msg);
-                }
-            } catch (IOException e) {
-                if (rodando) System.err.println("Erro thread: " + e.getMessage());
-            }
-        });
-        thr.start();
-    }
-
     public void envMsg(String txt) {
-        if (sai != null) sai.println(txt);
+        sai.println(txt);
     }
 
     public String recMsg() throws IOException {
         return ent.readLine();
     }
 
-    public void fecCon() throws IOException {
-        if (ent != null) ent.close();
-        if (sai != null) sai.close();
-        if (cli != null) cli.close();
+    private void iniThr() {
+        thr = new Thread(() -> {
+            try {
+                String msg;
+                while ((msg = recMsg()) != null) {
+                    System.out.println("Recebido: " + msg);
+                    envMsg(msg);
+                }
+            } catch (IOException e) {
+                System.err.println("Erro thread: " + e.getMessage());
+            }
+        });
+        thr.start();
     }
 
-    public void stop() throws IOException {
-        rodando = false;
-        if (ser != null) ser.close();
+    public void fecCon() throws IOException {
+        ent.close();
+        sai.close();
+        cli.close();
     }
 }
