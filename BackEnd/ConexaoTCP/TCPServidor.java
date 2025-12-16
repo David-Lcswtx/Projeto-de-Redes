@@ -49,6 +49,7 @@ public class TCPServidor {
                 String msg;
                 while ((msg = recMsg()) != null) {
                     System.out.println("Recebido: " + msg);
+                    envMsg(msg);
                 }
             } catch (IOException e) {
                 System.err.println("Erro thread: " + e.getMessage());
