@@ -2,7 +2,7 @@
  *
  * @author arthux
  */
-public class criptografia{
+public class Criptografia{
     private static final int CHAVE = 3; //
 
   public static String criptografar(String texto){ // vai receber a mesagem
