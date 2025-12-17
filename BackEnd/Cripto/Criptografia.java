@@ -1,40 +1,33 @@
-/**
- *
- * @author arthux
- */
-public class Criptografia{
-    private static final int CHAVE = 3; //
+package cripto;
 
-  public static String criptografar(String texto){ // vai receber a mesagem
-         StringBuilder resultado = new StringBuilder();
-         
-         for(char c: texto.toCharArray()){
-             if(Character.isLetter(c)){
-                 char base = Character.isLowerCase(c) ? 'a' : 'A';
-                 char novo = (char)((c - base + CHAVE) % 26 + base);
-                 resultado.append(novo);
-             } else{
-                 resultado.append(c);
-             }
-         }
-    resultado.toString();  
-    return resultado.toString();
-  }
+public class Criptografia {
+    private static final int CHAVE = 3;
 
-
-public static String descriptografar(String texto){
-    StringBuilder resultado = new StringBuilder();
-
-    for(char c: texto.toCharArray()){
-        if(Character.isLetter(c)){ 
-            char base = Character.isLowerCase(c) ? 'a' : 'A';
-            char novo = (char)((c - base - CHAVE + 26) % 26 + base);
-            resultado.append(novo);
-        } else{
-            resultado.append(c);
+    public static String criptografar(String texto) {
+        StringBuilder resultado = new StringBuilder();
+        for (char c : texto.toCharArray()) {
+            if (Character.isLetter(c)) {
+                char base = Character.isLowerCase(c) ? 'a' : 'A';
+                char novo = (char) ((c - base + CHAVE) % 26 + base);
+                resultado.append(novo);
+            } else {
+                resultado.append(c);
             }
-        }   
-     resultado.toString(); 
-     return resultado.toString();
-}
+        }
+        return resultado.toString();
+    }
+
+    public static String descriptografar(String texto) {
+        StringBuilder resultado = new StringBuilder();
+        for (char c : texto.toCharArray()) {
+            if (Character.isLetter(c)) {
+                char base = Character.isLowerCase(c) ? 'a' : 'A';
+                char novo = (char) ((c - base - CHAVE + 26) % 26 + base);
+                resultado.append(novo);
+            } else {
+                resultado.append(c);
+            }
+        }
+        return resultado.toString();
+    }
 }
