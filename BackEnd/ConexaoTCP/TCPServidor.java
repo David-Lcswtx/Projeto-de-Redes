@@ -3,14 +3,19 @@ import java.io.*;
 import java.util.*;
 
 public class TCPServidor {
+    private int porta;
+    private ServerSocket servidor;
+    private List<ClienteHandler> clientes = Collections.synchronizedList(new ArrayList<>());
 
-    int por = 5001;
-    List<ClienteHandler> clientes = Collections.synchronizedList(new ArrayList<>());
+    public TCPServidor(int porta) {
+        this.porta = porta;
+    }
 
     public void iniSer() {
-        try (ServerSocket ser = new ServerSocket(por)) {
-            while (true) {
-                Socket cli = ser.accept();
+        try {
+            servidor = new ServerSocket(porta);
+            while (!servidor.isClosed()) {
+                Socket cli = servidor.accept();
                 ClienteHandler ch = new ClienteHandler(cli);
                 clientes.add(ch);
                 ch.start();
@@ -20,10 +25,26 @@ public class TCPServidor {
         }
     }
 
+    public void stopServer() {
+        try {
+            if (servidor != null && !servidor.isClosed()) {
+                servidor.close();
+            }
+            synchronized (clientes) {
+                for (ClienteHandler c : clientes) {
+                    c.close();
+                }
+                clientes.clear();
+            }
+        } catch (IOException e) {
+            System.err.println("Erro ao encerrar servidor: " + e.getMessage());
+        }
+    }
+
     private class ClienteHandler extends Thread {
-        Socket cli;
-        BufferedReader ent;
-        PrintWriter sai;
+        private Socket cli;
+        private BufferedReader ent;
+        private PrintWriter sai;
 
         ClienteHandler(Socket cli) {
             this.cli = cli;
@@ -39,17 +60,28 @@ public class TCPServidor {
             try {
                 String msg;
                 while ((msg = ent.readLine()) != null) {
-                    for (ClienteHandler c : clientes) {
-                        c.sai.println(msg);
+                    synchronized (clientes) {
+                        for (ClienteHandler c : clientes) {
+                            if (c != this) {
+                                c.sai.println(msg);
+                            }
+                        }
                     }
                 }
-                clientes.remove(this);
-                ent.close();
-                sai.close();
-                cli.close();
             } catch (IOException e) {
                 System.err.println("Erro thread: " + e.getMessage());
+            } finally {
+                clientes.remove(this);
+                close();
             }
+        }
+
+        public void close() {
+            try {
+                if (ent != null) ent.close();
+                if (sai != null) sai.close();
+                if (cli != null && !cli.isClosed()) cli.close();
+            } catch (IOException e) {}
         }
     }
 }
