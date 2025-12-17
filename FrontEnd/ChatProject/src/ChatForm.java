@@ -163,21 +163,21 @@ public class ChatForm extends javax.swing.JFrame {
     }// </editor-fold>                        
 
     private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {                                          
-        String nome = jTextNome.getText();
-        String msg = jTextMensagem.getText();
+         String nome = jTextNome.getText();
+    String msg = jTextMensagem.getText();
 
-        if (msg.isEmpty()) 
-            return;
+    if (msg.isEmpty()) 
+        return;
 
-        String texto = nome + ": " + msg;
+    String texto = nome + ": " + msg;
 
-        String cript = cripto.Criptografia.criptografar(texto);
+    String cript = cripto.Criptografia.criptografar(texto);
 
-        cli.envMsg(cript);
+    cli.envMsg(cript);
 
-        jTextChat.append(texto + "\n");
+    jTextChat.append(texto + "\n");
 
-        jTextMensagem.setText("");
+    jTextMensagem.setText("");
     }                                         
 
     private void btnConectarActionPerformed(java.awt.event.ActionEvent evt) {                                            
@@ -193,13 +193,11 @@ public class ChatForm extends javax.swing.JFrame {
             String msg;
             while ((msg = cli.recMsg()) != null) {
                 String texto = cripto.Criptografia.descriptografar(msg);
-                SwingUtilities.invokeLater(() -> {
+                javax.swing.SwingUtilities.invokeLater(() -> {
                     jTextChat.append(texto + "\n");
                 });
             }
-        } catch (Exception e) {
-            System.err.println("Erro recepção: " + e.getMessage());
-        }
+        } catch (Exception e) {}
     }).start();
     }                                           
 
@@ -258,3 +256,4 @@ public class ChatForm extends javax.swing.JFrame {
     private javax.swing.JTextField jTextPorta;
     // End of variables declaration                   
 }
+
