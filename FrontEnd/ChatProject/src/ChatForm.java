@@ -163,42 +163,55 @@ public class ChatForm extends javax.swing.JFrame {
     }// </editor-fold>                        
 
     private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {                                          
-         String nome = jTextNome.getText();
-    String msg = jTextMensagem.getText();
+   String nome = jTextNome.getText().trim();
+    String msg = jTextMensagem.getText().trim();
 
-    if (msg.isEmpty()) 
-        return;
+    if (nome.isEmpty() || msg.isEmpty()) return;
 
     String texto = nome + ": " + msg;
 
-    String cript = cripto.Criptografia.criptografar(texto);
-
-    cli.envMsg(cript);
-
-    jTextChat.append(texto + "\n");
-
+    cli.envMsg(texto);
     jTextMensagem.setText("");
     }                                         
 
     private void btnConectarActionPerformed(java.awt.event.ActionEvent evt) {                                            
-    String ip = jTextIP.getText();
-    int porta = Integer.parseInt(jTextPorta.getText());
+       String ip = jTextIP.getText().trim();
 
-    cli.conIP(ip, porta);
+    try {
+        int porta = Integer.parseInt(jTextPorta.getText().trim());
+        cli.conIP(ip, porta);
+        jTextChat.append("Conectado ao IP " + ip + ":" + porta + "\n");
 
-    jTextChat.append("Conectado ao IP " + ip + ":" + porta + "\n");
+        new Thread(() -> {
+    try {
+        String msg;
+        while ((msg = cli.recMsg()) != null) {
+            String nome = jTextNome.getText().trim();
+            String textoFinal = msg;
 
-    new Thread(() -> {
-        try {
-            String msg;
-            while ((msg = cli.recMsg()) != null) {
-                String texto = cripto.Criptografia.descriptografar(msg);
-                javax.swing.SwingUtilities.invokeLater(() -> {
-                    jTextChat.append(texto + "\n");
-                });
+            if (msg.startsWith(nome + ":")) {
+                int i = msg.indexOf(":");
+                String cab = msg.substring(0, i + 1);
+                String corpo = msg.substring(i + 1).trim();
+                corpo = cripto.Criptografia.descriptografar(corpo);
+                textoFinal = cab + " " + corpo;
             }
-        } catch (Exception e) {}
-    }).start();
+
+            String exibir = textoFinal;
+            SwingUtilities.invokeLater(() -> {
+                jTextChat.append(exibir + "\n");
+            });
+        }
+    } catch (Exception e) {
+        SwingUtilities.invokeLater(() ->
+            jTextChat.append("Conexão encerrada.\n")
+        );
+    }
+}).start();
+
+    } catch (NumberFormatException e) {
+        jTextChat.append("Porta inválida.\n");
+    }
     }                                           
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {                                         
