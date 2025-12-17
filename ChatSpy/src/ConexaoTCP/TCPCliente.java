@@ -6,14 +6,12 @@ public class TCPCliente {
     Socket soc;
     PrintWriter sai;
     BufferedReader ent;
-    Thread thr;
 
     public void conIP(String ip, int por) {
         try {
             soc = new Socket(ip, por);
             sai = new PrintWriter(soc.getOutputStream(), true);
             ent = new BufferedReader(new InputStreamReader(soc.getInputStream()));
-            iniThr();
         } catch (IOException e) {
             System.err.println("Erro cliente: " + e.getMessage());
         }
@@ -21,30 +19,20 @@ public class TCPCliente {
 
     public void envMsg(String txt) {
         if (sai != null) {
-            String criptografado = Criptografia.criptografar(txt);
-            sai.println(criptografado);
-        } else {
-            System.err.println("Cliente não conectado.");
+            int i = txt.indexOf(":");
+            if (i != -1) {
+                String nome = txt.substring(0, i + 1);
+                String msg = txt.substring(i + 1).trim();
+                String cifrada = Criptografia.criptografar(msg);
+                sai.println(nome + " " + cifrada);
+            } else {
+                sai.println(Criptografia.criptografar(txt));
+            }
         }
     }
 
     public String recMsg() throws IOException {
-        String recebido = ent.readLine();
-        return recebido != null ? Criptografia.descriptografar(recebido) : null;
-    }
-
-    private void iniThr() {
-        thr = new Thread(() -> {
-            try {
-                String msg;
-                while ((msg = recMsg()) != null) {
-                    System.out.println("Recebido: " + msg);
-                }
-            } catch (IOException e) {
-                System.err.println("Erro thread: " + e.getMessage());
-            }
-        });
-        thr.start();
+        return ent.readLine();
     }
 
     public void fecCon() throws IOException {
