@@ -1,4 +1,3 @@
-
 import javax.swing.SwingUtilities;
 
 /*
@@ -11,7 +10,8 @@ import javax.swing.SwingUtilities;
  * @author DAVID LUCAS
  */
 public class ChatForm extends javax.swing.JFrame {
-    TCPCliente cli = new TCPCliente();
+     TCPCliente cli = new TCPCliente();
+
     /**
      * Creates new form ChatForm
      */
@@ -163,19 +163,24 @@ public class ChatForm extends javax.swing.JFrame {
     }// </editor-fold>                        
 
     private void btnEnviarActionPerformed(java.awt.event.ActionEvent evt) {                                          
-   String nome = jTextNome.getText().trim();
+    String nome = jTextNome.getText().trim();
     String msg = jTextMensagem.getText().trim();
 
     if (nome.isEmpty() || msg.isEmpty()) return;
 
-    String texto = nome + ": " + msg;
+    
+    String textoLocal = nome + ": " + msg;
+    jTextChat.append(textoLocal + "\n");
 
-    cli.envMsg(texto);
+ 
+    String textoEnviar = nome + ": " + cripto.Criptografia.criptografar(msg);
+    cli.envMsg(textoEnviar);
+
     jTextMensagem.setText("");
     }                                         
 
     private void btnConectarActionPerformed(java.awt.event.ActionEvent evt) {                                            
-       String ip = jTextIP.getText().trim();
+         String ip = jTextIP.getText().trim();
 
     try {
         int porta = Integer.parseInt(jTextPorta.getText().trim());
@@ -269,4 +274,3 @@ public class ChatForm extends javax.swing.JFrame {
     private javax.swing.JTextField jTextPorta;
     // End of variables declaration                   
 }
-
